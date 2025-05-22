@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PythonとGhostscript統合導入ガイド</title>
+    <title>PythonとGhostscript導入ガイド</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -51,784 +51,777 @@
             visibility: visible;
             opacity: 1;
         }
-        
-        /* インフォグラフィック用スタイル */
-        .infographic-view {
-            background-color: #EFEFEF;
-        }
-        .infographic-view .section-title {
-            color: #118AB2;
-        }
-        .infographic-view .card {
-            background-color: #FFFFFF;
-            border-left: 5px solid #FF6B6B;
-        }
-        .infographic-view .highlight-box {
-            background-color: #FFD166;
-            color: #333333;
-            border: 2px solid #FF6B6B;
-        }
-        .infographic-view .command-box {
-            background-color: #2d3748;
-            color: #e2e8f0;
-            font-family: monospace;
-        }
-        .infographic-view .accent-text {
-            color: #06D6A0;
-        }
-        .infographic-view .primary-text {
-            color: #FF6B6B;
-        }
-        .infographic-view .step-number {
-            background-color: #118AB2;
-            color: white;
-        }
-        .infographic-view .flow-arrow {
-            color: #118AB2;
-            font-size: 2rem;
-            line-height: 1;
-        }
-        
-        /* 詳細ビュー用スタイル（デフォルト） */
-        .detailed-view {
-            background-color: #f8fafc;
-        }
-        
-        .view-toggle-btn {
-            transition: all 0.3s ease;
-        }
-        .view-toggle-btn.active {
-            background-color: #0369a1;
-            color: white;
-        }
+        /* Chosen Palette: Warm Neutrals with Subtle Sky Blue Accents */
+        /* Primary Background: bg-slate-50 */
+        /* Content Background: bg-white */
+        /* Primary Text: text-slate-700 */
+        /* Headings/Accents: text-sky-600 */
+        /* Buttons: bg-sky-600 text-white */
     </style>
-</head>
-<body class="detailed-view text-slate-700">
+    <!-- Visualization & Content Choices:
+        - Report Info: System type check (32/64 bit) -> Goal: Inform -> Presentation: Textual instruction -> Interaction: None -> Justification: Clear, direct instruction.
+        - Report Info: Python/Ghostscript installation check (command) -> Goal: Inform/Instruct -> Presentation: Code block with copy button -> Interaction: Copy command -> Justification: Easy execution for user.
+        - Report Info: Python installation steps -> Goal: Instruct -> Presentation: Numbered list with highlighted "Add to PATH" -> Interaction: Visual emphasis -> Justification: Critical step highlighted.
+        - Report Info: PATH manual addition steps -> Goal: Instruct -> Presentation: Accordion with detailed steps & code blocks -> Interaction: Expand/collapse, copy command -> Justification: Manages complexity, provides detail on demand.
+        - Report Info: Ghostscript license comparison -> Goal: Inform/Compare -> Presentation: HTML table -> Interaction: None -> Justification: Clear comparison of features.
+        - Report Info: Troubleshooting common issues -> Goal: Solve -> Presentation: Problem/Solution pairs in expandable sections -> Interaction: Expand/collapse -> Justification: Easy to find relevant solutions.
+        - Report Info: Glossary -> Goal: Inform/Define -> Presentation: Interactive list (term + definition toggle) -> Interaction: Click to view definition -> Justification: Quick access to term explanations.
+        - Library/Method: Vanilla JavaScript for all interactions. Tailwind CSS for styling. No Chart.js/Plotly.js as no chartable data.
+        CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    </head>
+<body class="bg-slate-50 text-slate-700">
 
     <div class="container mx-auto min-h-screen flex flex-col">
         <header class="text-center py-6 md:py-10 bg-white shadow-md">
             <h1 class="text-3xl md:text-4xl font-bold text-sky-700">PythonとGhostscript導入ガイド</h1>
-            <p class="text-slate-600 mt-2 text-sm md:text-base">初心者向け・完全統合解説</p>
-            
-            <!-- ビュー切り替えボタン -->
-            <div class="flex justify-center mt-4 space-x-2">
-                <button id="detailedViewBtn" class="view-toggle-btn active px-4 py-2 rounded-md border border-sky-200 text-sm font-medium transition-colors">
-                    📚 詳細ガイド
-                </button>
-                <button id="infographicViewBtn" class="view-toggle-btn px-4 py-2 rounded-md border border-sky-200 text-sm font-medium transition-colors hover:bg-sky-50">
-                    📊 インフォグラフィック
-                </button>
-            </div>
+            <p class="text-slate-600 mt-2 text-sm md:text-base">初心者向け・インタラクティブ解説</p>
         </header>
 
-        <!-- 詳細ビューのコンテンツ -->
-        <div id="detailedContent" class="view-content">
-            <div class="flex flex-col md:flex-row flex-grow p-4 md:p-6 gap-4 md:gap-6">
-                <nav id="mainNav" class="md:w-1/4 lg:w-1/5 bg-white rounded-lg shadow-md p-4 self-start md:sticky md:top-6">
-                    <h2 class="text-lg font-semibold text-sky-700 mb-3 border-b pb-2">目次</h2>
-                    <ul class="space-y-1 nav-links">
-                        <li><a href="#part1" data-target="part1" class="block nav-link px-3 py-2 rounded-md hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150">準備体操</a></li>
-                        <li><a href="#part2" data-target="part2" class="block nav-link px-3 py-2 rounded-md hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150">Pythonの導入</a></li>
-                        <li><a href="#part3" data-target="part3" class="block nav-link px-3 py-2 rounded-md hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150">PATH設定</a></li>
-                        <li><a href="#part4" data-target="part4" class="block nav-link px-3 py-2 rounded-md hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150">Ghostscriptの導入</a></li>
-                        <li><a href="#part5" data-target="part5" class="block nav-link px-3 py-2 rounded-md hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150">最終チェック</a></li>
-                        <li><a href="#part6" data-target="part6" class="block nav-link px-3 py-2 rounded-md hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150">困ったときは</a></li>
-                        <li><a href="#part7" data-target="part7" class="block nav-link px-3 py-2 rounded-md hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150">クイックリファレンス</a></li>
-                        <li><a href="#part8" data-target="part8" class="block nav-link px-3 py-2 rounded-md hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150">用語集</a></li>
-                    </ul>
-                </nav>
+        <div class="flex flex-col md:flex-row flex-grow p-4 md:p-6 gap-4 md:gap-6">
+            <nav id="mainNav" class="md:w-1/4 lg:w-1/5 bg-white rounded-lg shadow-md p-4 self-start md:sticky md:top-6">
+                <h2 class="text-lg font-semibold text-sky-700 mb-3 border-b pb-2">目次</h2>
+                <ul class="space-y-1 nav-links">
+                    <li><a href="#part1" data-target="part1" class="block nav-link px-3 py-2 rounded-md hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150">準備体操</a></li>
+                    <li><a href="#part2" data-target="part2" class="block nav-link px-3 py-2 rounded-md hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150">Pythonの導入</a></li>
+                    <li><a href="#part3" data-target="part3" class="block nav-link px-3 py-2 rounded-md hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150">PATH設定</a></li>
+                    <li><a href="#part4" data-target="part4" class="block nav-link px-3 py-2 rounded-md hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150">Ghostscriptの導入</a></li>
+                    <li><a href="#part5" data-target="part5" class="block nav-link px-3 py-2 rounded-md hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150">最終チェック</a></li>
+                    <li><a href="#part6" data-target="part6" class="block nav-link px-3 py-2 rounded-md hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150">困ったときは</a></li>
+                    <li><a href="#part7" data-target="part7" class="block nav-link px-3 py-2 rounded-md hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150">クイックリファレンス</a></li>
+                    <li><a href="#part8" data-target="part8" class="block nav-link px-3 py-2 rounded-md hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150">用語集</a></li>
+                </ul>
+            </nav>
 
-                <main id="contentArea" class="md:w-3/4 lg:w-4/5 bg-white rounded-lg shadow-md p-6 md:p-8">
-                    <section id="part1" class="content-section space-y-6">
-                        <h2 class="text-2xl font-bold text-sky-600 border-b-2 border-sky-200 pb-2">Part 1: まずは準備体操 - あなたのPCと基本用語を学ぼう</h2>
-                        <p class="leading-relaxed">このセクションでは、PythonやGhostscriptをインストールする前に知っておくと便利な、お使いのWindows PCの基本的な情報（32ビットか64ビットか）の確認方法と、これから出てくるかもしれないいくつかの専門用語について、やさしく解説します。準備をしっかりして、スムーズなインストールを目指しましょう！</p>
+            <main id="contentArea" class="md:w-3/4 lg:w-4/5 bg-white rounded-lg shadow-md p-6 md:p-8">
+                <section id="part1" class="content-section space-y-6">
+                    <h2 class="text-2xl font-bold text-sky-600 border-b-2 border-sky-200 pb-2">Part 1: まずは準備体操 - あなたのPCと基本用語を学ぼう</h2>
+                    <p class="leading-relaxed">このセクションでは、PythonやGhostscriptをインストールする前に知っておくと便利な、お使いのWindows PCの基本的な情報（32ビットか64ビットか）の確認方法と、これから出てくるかもしれないいくつかの専門用語について、やさしく解説します。準備をしっかりして、スムーズなインストールを目指しましょう！</p>
 
-                        <div>
-                            <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-sysinfo">
-                                <span>あなたのWindowsは32ビット？それとも64ビット？</span>
-                                <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                            </button>
-                            <div id="accordion-sysinfo" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-3">
-                                <p>何かをダウンロードする前に、お使いのシステムが32ビットなのか64ビットなのかを確認しましょう。64ビットシステムは一度により多くのデータを処理できる広い道路のようなもので、一般的に高速です。最近のPCのほとんどは64ビットです。</p>
-                                <h4 class="font-semibold text-slate-700">確認方法 (Windows 10/11):</h4>
-                                <ol class="list-decimal list-inside space-y-1 pl-4">
-                                    <li>「スタート」ボタンをクリックし、「設定」（歯車のアイコン）に進みます。</li>
-                                    <li>「システム」をクリックし、左側のメニューから「バージョン情報」または「詳細情報」を選びます。</li>
-                                    <li>「システムの種類」という項目に「64ビット オペレーティングシステム」または「32ビット オペレーティングシステム」と表示されます。</li>
-                                    <li>(Windows 11は64ビット版のみ存在します。)</li>
-                                </ol>
-                                <p class="italic text-sm text-slate-500">この情報は、特にGhostscriptの正しいバージョンを選ぶ際に役立ちます。</p>
-                                <div class="p-3 bg-sky-100 border-l-4 border-sky-500 text-sky-700 rounded-r-md">
-                                    <h5 class="font-semibold">ワンポイントアドバイス:</h5>
-                                    <p class="text-sm">64ビットシステムなら、64ビット版のソフトウェアを選ぶのが最適です。32ビットシステムの場合は、必ず32ビット版のソフトウェアを使用してください。</p>
-                                </div>
+                    <div>
+                        <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-sysinfo">
+                            <span>あなたのWindowsは32ビット？それとも64ビット？</span>
+                            <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                        </button>
+                        <div id="accordion-sysinfo" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-3">
+                            <p>何かをダウンロードする前に、お使いのシステムが32ビットなのか64ビットなのかを確認しましょう。64ビットシステムは一度により多くのデータを処理できる広い道路のようなもので、一般的に高速です。最近のPCのほとんどは64ビットです。</p>
+                            <h4 class="font-semibold text-slate-700">確認方法 (Windows 10/11):</h4>
+                            <ol class="list-decimal list-inside space-y-1 pl-4">
+                                <li>「スタート」ボタンをクリックし、「設定」（歯車のアイコン）に進みます。</li>
+                                <li>「システム」をクリックし、左側のメニューから「バージョン情報」または「詳細情報」を選びます。</li>
+                                <li>「システムの種類」という項目に「64ビット オペレーティングシステム」または「32ビット オペレーティングシステム」と表示されます。</li>
+                                <li>(Windows 11は64ビット版のみ存在します。)</li>
+                            </ol>
+                            <p class="italic text-sm text-slate-500">この情報は、特にGhostscriptの正しいバージョンを選ぶ際に役立ちます。</p>
+                            <div class="p-3 bg-sky-100 border-l-4 border-sky-500 text-sky-700 rounded-r-md">
+                                <h5 class="font-semibold">ワンポイントアドバイス:</h5>
+                                <p class="text-sm">64ビットシステムなら、64ビット版のソフトウェアを選ぶのが最適です。32ビットシステムの場合は、必ず32ビット版のソフトウェアを使用してください。</p>
                             </div>
                         </div>
-                        <div>
-                            <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-terms-intro">
-                                <span>これから使う大切な用語</span>
-                                <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                            </button>
-                            <div id="accordion-terms-intro" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md">
-                                <p>このガイドを進める中で、いくつかの専門用語が出てくるかもしれません。「コマンドプロンプト」「PATH」「インストーラー」「ディレクトリ」などです。でも心配いりません！その都度説明しますし、最後には詳しい「用語集」も用意していますので、安心して進めてくださいね。</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section id="part2" class="content-section space-y-6">
-                        <h2 class="text-2xl font-bold text-sky-600 border-b-2 border-sky-200 pb-2">Part 2: Python - あなたの新しい武器！</h2>
-                        <p class="leading-relaxed">Pythonは、プログラミング言語の一つで、ウェブサイト開発からデータ分析、AIまで幅広く使われている人気のツールです。初心者にも比較的学びやすいと言われています。このセクションでは、Pythonが既にPCにインストールされているかの確認方法、そして公式サイトからのダウンロードとインストール手順を詳しく解説します。</p>
-
-                        <div>
-                            <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-python-what">
-                                <span>Pythonって、そもそも何？</span>
-                                <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                            </button>
-                            <div id="accordion-python-what" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md">
-                                <p>Pythonは、コンピューターに指示を与えるための言葉のようなものです。読みやすく書きやすい構文が特徴で、Googleのような大企業も様々な用途で活用しています。無料で利用でき、豊富な「ライブラリ」（便利なコードの部品集）によって、複雑な作業も比較的簡単に行えます。</p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-python-check">
-                                <span>Pythonがインストール済みか確認</span>
-                                <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                            </button>
-                            <div id="accordion-python-check" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-4">
-                                <h4 class="font-semibold text-slate-700">コマンドプロンプトで確認:</h4>
-                                <ol class="list-decimal list-inside space-y-1 pl-4">
-                                    <li>Windowsの検索バーに「<code>cmd</code>」と入力し、「コマンドプロンプト」を開きます。</li>
-                                    <li>黒い画面に以下のコマンドを入力し、Enterキーを押します:
-                                        <div class="my-2 p-3 bg-slate-800 text-slate-100 rounded-md relative">
-                                            <code class="block whitespace-pre-wrap">python --version</code>
-                                            <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded" data-command="python --version">
-                                                コピー <span class="tooltip">コピーしました!</span>
-                                            </button>
-                                        </div>
-                                        (または <code>python -V</code> でもOK)
-                                    </li>
-                                    <li>「Python 3.x.x」のようにバージョンが表示されればインストール済みです。</li>
-                                    <li>「'python' は...認識されていません」などのメッセージが出たら、未インストールかPATHが通っていません。</li>
-                                </ol>
-                                <h4 class="font-semibold text-slate-700">インストール場所の確認 (もしインストールされていたら):</h4>
-                                <p>コマンドプロンプトで以下を入力します:</p>
-                                <div class="my-2 p-3 bg-slate-800 text-slate-100 rounded-md relative">
-                                    <code class="block whitespace-pre-wrap">where python</code>
-                                    <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded" data-command="where python">
-                                        コピー <span class="tooltip">コピーしました!</span>
-                                    </button>
-                                </div>
-                                <p><code>C:\Users\&lt;あなたのユーザー名&gt;\AppData\Local\Programs\Python\PythonXX\python.exe</code> のようなパスが表示されます。</p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-python-install">
-                                <span>Pythonのダウンロードとインストール</span>
-                                <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                            </button>
-                            <div id="accordion-python-install" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-4">
-                                <h4 class="font-semibold text-slate-700">1. 公式サイトからダウンロード:</h4>
-                                <p>Pythonの公式サイト <a href="https://www.python.org/downloads/" target="_blank" class="text-sky-600 hover:underline">python.org/downloads/</a> にアクセスします。</p>
-                                <p>通常、トップページに最新版のダウンロードボタン（例: "Download Python 3.12.2"）があります。これをクリックすると、お使いのWindowsに合ったインストーラー（通常は64ビット版）がダウンロードされます。</p>
-
-                                <h4 class="font-semibold text-slate-700">2. インストーラーの実行と重要ポイント:</h4>
-                                <ol class="list-decimal list-inside space-y-2 pl-4">
-                                    <li>ダウンロードした <code>.exe</code> ファイル（例: <code>python-3.12.2-amd64.exe</code>）をダブルクリックして実行します。</li>
-                                    <li class="font-bold text-red-600">超重要: インストーラーの最初の画面の下部にある「Add Python 3.x to PATH」または「Add python.exe to PATH」というチェックボックスに必ずチェックを入れてください！</li>
-                                    <img src="/api/placeholder/600/300" alt="PythonインストーラーのPATH追加画面のイメージ" class="my-2 rounded-md shadow">
-                                    <p class="text-sm italic ml-4">このチェックを入れると、コマンドプロンプトでPythonを簡単に使えるようになります。</p>
-                                    <li>「Install Now」をクリックして、推奨設定でインストールを進めます。</li>
-                                    <li>「このアプリがデバイスに変更を加えることを許可しますか？」と表示されたら「はい」をクリック。</li>
-                                    <li>インストール完了後、「Close」をクリックします。</li>
-                                </ol>
-
-                                <h4 class="font-semibold text-slate-700">3. インストールの確認:</h4>
-                                <p>新しいコマンドプロンプトウィンドウを開き（重要！）、再度 <code>python --version</code> を実行してバージョンが表示されるか確認します。</p>
-                                <div class="p-3 bg-sky-100 border-l-4 border-sky-500 text-sky-700 rounded-r-md">
-                                    <h5 class="font-semibold">Pythonインストール状況のクイックチェック:</h5>
-                                    <ul class="list-disc list-inside text-sm space-y-1">
-                                        <li>Pythonはインストールされましたか？</li>
-                                        <li>バージョンはわかりますか？</li>
-                                        <li>PCはPythonの場所を知っていますか（PATHは設定されましたか）？</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section id="part3" class="content-section space-y-6">
-                        <h2 class="text-2xl font-bold text-sky-600 border-b-2 border-sky-200 pb-2">Part 3: 「PATH」- プログラムを簡単に見つけられるようにする</h2>
-                        <p class="leading-relaxed">「PATH（パス）を通す」という言葉を聞いたことがありますか？これは、コンピューターがプログラムを簡単に見つけられるようにするための重要な設定です。このセクションでは、環境変数「PATH」とは何か、なぜ重要なのか、そしてPythonのインストール時に設定し忘れた場合に手動で設定する方法を解説します。</p>
-
-                        <div>
-                            <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-path-what">
-                                <span>環境変数とPATHとは？</span>
-                                <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                            </button>
-                            <div id="accordion-path-what" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-3">
-                                <p><strong>環境変数</strong>は、PCの動作に必要な設定情報（ユーザー名、一時ファイルの場所など）を保存するメモ帳のようなものです。</p>
-                                <p><strong>PATH</strong>はその中でも特に重要な環境変数で、プログラムの「住所録」のような役割をします。コマンドプロンプトでプログラム名（例: <code>python</code>）だけを入力したとき、WindowsはこのPATHに登録されたフォルダーを探しに行きます。そこにプログラムがあれば、どこからでも簡単に実行できるのです。</p>
-                                <p class="text-sm italic">PATHが通っていないと、毎回プログラムのフルパス（例: <code>C:\... \python.exe</code>）を入力する必要があり、非常に面倒です。</p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-path-check-edit">
-                                <span>現在のPATH設定の確認方法</span>
-                                <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                            </button>
-                            <div id="accordion-path-check-edit" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-3">
-                                <ol class="list-decimal list-inside space-y-1 pl-4">
-                                    <li>Windowsの検索バーに「<code>環境変数</code>」と入力します。</li>
-                                    <li>「システム環境変数の編集」をクリックします。</li>
-                                    <li>「システムのプロパティ」ウィンドウの「詳細設定」タブで、「環境変数...」ボタンをクリックします。</li>
-                                    <li>「ユーザー環境変数」と「システム環境変数」のセクションに「Path」（または「PATH」）があります。これを選択し「編集...」をクリックすると、登録されているフォルダーのリストが表示されます。</li>
-                                </ol>
-                                <p class="font-semibold text-red-600">注意: ここでは確認するだけにしましょう。誤った変更はシステムに影響を与える可能性があります。</p>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-python-path-manual">
-                                <span>PythonのPATHを手動で設定する方法</span>
-                                <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                            </button>
-                            <div id="accordion-python-path-manual" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-4">
-                                <p>インストール時に「Add Python to PATH」にチェックを入れ忘れた場合や、<code>python --version</code>が機能しない場合は、手動で設定します。</p>
-                                <h4 class="font-semibold text-slate-700">1. Pythonの重要なフォルダーを確認:</h4>
-                                <p>通常、以下の2つのフォルダーをPATHに追加します:</p>
-                                <ul class="list-disc list-inside space-y-1 pl-4">
-                                    <li>メインのインストールフォルダー (<code>python.exe</code> がある場所):<br>例: <code>C:\Users\&lt;あなたのユーザー名&gt;\AppData\Local\Programs\Python\PythonXX</code> (XXはバージョン)</li>
-                                    <li><code>Scripts</code> フォルダー (メインフォルダー内、<code>pip</code>などのツールがある):<br>例: <code>C:\Users\&lt;あなたのユーザー名&gt;\AppData\Local\Programs\Python\PythonXX\Scripts</code></li>
-                                </ul>
-                                <p class="text-sm italic">これらの正確なパスは <code>where python</code> コマンドやファイルエクスプローラーで確認できます。</p>
-
-                                <h4 class="font-semibold text-slate-700">2. PATHへの追加手順 (GUI):</h4>
-                                <ol class="list-decimal list-inside space-y-2 pl-4">
-                                    <li>上記「現在のPATH設定の確認方法」の手順で「環境変数」ウィンドウを開きます。</li>
-                                    <li>「&lt;あなたのユーザー名&gt; のユーザー環境変数」セクションで「Path」を選択し、「編集...」をクリック。（なければ「新規...」で変数名「Path」を作成）</li>
-                                    <li>「環境変数の編集」ウィンドウで「新規」をクリック。</li>
-                                    <li>Pythonのメインインストールフォルダーのフルパスを貼り付け、Enter。</li>
-                                    <li>再度「新規」をクリック。</li>
-                                    <li>Pythonの<code>Scripts</code>フォルダーのフルパスを貼り付け、Enter。</li>
-                                    <li>開いている全てのウィンドウ（「環境変数の編集」、「環境変数」、「システムのプロパティ」）で「OK」をクリックして保存します。</li>
-                                </ol>
-                                <div class="p-3 bg-sky-100 border-l-4 border-sky-500 text-sky-700 rounded-r-md">
-                                    <h5 class="font-semibold">ワンポイントアドバイス: ユーザーPATHとシステムPATH</h5>
-                                    <p class="text-sm">通常は「ユーザー環境変数」のPathに追加するのが安全で推奨されます。これはログイン中のあなただけに影響します。システム環境変数はPCの全ユーザーに影響します。</p>
-                                </div>
-                                <h4 class="font-semibold text-slate-700">3. 設定の確認:</h4>
-                                <p><strong>必ず新しい</strong>コマンドプロンプトを開き、<code>python --version</code> と <code>pip --version</code> を実行して動作を確認します。</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section id="part4" class="content-section space-y-6">
-                        <h2 class="text-2xl font-bold text-sky-600 border-b-2 border-sky-200 pb-2">Part 4: Ghostscript - あなたの書類や画像の助っ人</h2>
-                        <p class="leading-relaxed">Ghostscriptは、PDFやPostScriptといった文書・画像形式を扱うための重要なソフトウェアです。直接使うことは少ないかもしれませんが、他のプログラムがこれらのファイルを処理する際に裏方として活躍します。このセクションでは、Ghostscriptの役割、ライセンス、インストール確認、そして導入手順を解説します。</p>
-
-                        <div>
-                            <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-gs-what">
-                                <span>Ghostscriptって何？</span>
-                                <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                            </button>
-                            <div id="accordion-gs-what" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md">
-                                <p>Ghostscriptは、PDFファイルやPostScriptファイル（多くのプリンターで使われる言語）を解釈・変換・表示するのを助けるプログラムです。多くのグラフィックソフトやPDF関連ツールが、内部でGhostscriptを利用しています。</p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-gs-check">
-                                <span>Ghostscriptがインストール済みか確認</span>
-                                <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                            </button>
-                            <div id="accordion-gs-check" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-4">
-                                <h4 class="font-semibold text-slate-700">コマンドプロンプトで確認:</h4>
-                                <p>お使いのシステムに合わせて、以下のいずれかのコマンドを入力します:</p>
-                                <ul class="list-disc list-inside space-y-2 pl-4">
-                                    <li>64ビット版の場合:
-                                        <div class="my-2 p-3 bg-slate-800 text-slate-100 rounded-md relative">
-                                            <code class="block whitespace-pre-wrap">gswin64c -h</code>
-                                            <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded" data-command="gswin64c -h">
-                                                コピー <span class="tooltip">コピーしました!</span>
-                                            </button>
-                                        </div>
-                                    </li>
-                                    <li>32ビット版の場合:
-                                        <div class="my-2 p-3 bg-slate-800 text-slate-100 rounded-md relative">
-                                            <code class="block whitespace-pre-wrap">gswin32c -h</code>
-                                            <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded" data-command="gswin32c -h">
-                                                コピー <span class="tooltip">コピーしました!</span>
-                                            </button>
-                                        </div>
-                                    </li>
-                                </ul>
-                                <p>バージョン情報やヘルプテキストが表示されればインストール済みです。「'gswinXXc' は...認識されていません」と出たら未インストールかPATHが通っていません。</p>
-                                <h4 class="font-semibold text-slate-700">インストール場所の確認 (もしインストールされていたら):</h4>
-                                <p>通常は <code>C:\Program Files\gs\gsX.XX</code> (X.XXはバージョン番号) にインストールされます。実行ファイル (<code>gswin64c.exe</code> 等) はその中の <code>bin</code> フォルダーにあります。</p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-gs-license">
-                                <span>Ghostscriptのライセンス (AGPL vs 商用)</span>
-                                <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                            </button>
-                            <div id="accordion-gs-license" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-3">
-                                <p>Ghostscriptには主に2つのライセンスがあります:</p>
-                                <ul class="list-disc list-inside space-y-2 pl-4">
-                                    <li><strong>AGPL (GNU Affero General Public License):</strong> 無料のオープンソース版です。個人のPCで使う分にはこれで全く問題ありません。もしAGPL版Ghostscriptを改変してネットワークサービスとして提供する場合などは、ソースコードの公開が必要になることがあります。</li>
-                                    <li><strong>商用ライセンス:</strong> Artifex社から購入する有料ライセンスです。企業がGhostscriptを自社製品に組み込んで販売する場合や、ソースコードを公開したくない場合などに利用されます。</li>
-                                </ul>
-                                <p class="font-semibold">個人利用であれば、AGPL版を選んで問題ありません。</p>
-                                <div class="overflow-x-auto mt-3">
-                                    <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
-                                        <thead class="bg-gray-100">
-                                            <tr>
-                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">特徴</th>
-                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">AGPL Ghostscript</th>
-                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">商用 Ghostscript</th>
-                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">あなたにとって (個人利用)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="bg-white divide-y divide-gray-200 text-sm">
-                                            <tr>
-                                                <td class="px-4 py-2 whitespace-nowrap font-medium">費用</td>
-                                                <td class="px-4 py-2 whitespace-nowrap">無料</td>
-                                                <td class="px-4 py-2 whitespace-nowrap">有料</td>
-                                                <td class="px-4 py-2 whitespace-nowrap text-sky-700 font-semibold">AGPLが最適</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="px-4 py-2 whitespace-nowrap font-medium">自分のPCで使う</td>
-                                                <td class="px-4 py-2 whitespace-nowrap">問題なし</td>
-                                                <td class="px-4 py-2 whitespace-nowrap">問題なし</td>
-                                                <td class="px-4 py-2 whitespace-nowrap">AGPLを選びましょう</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="px-4 py-2 whitespace-nowrap font-medium">ソフトウェア開発・配布</td>
-                                                <td class="px-4 py-2">改変版利用時、コード共有の可能性あり</td>
-                                                <td class="px-4 py-2">コード共有不要</td>
-                                                <td class="px-4 py-2">個人利用では通常関係なし</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="px-4 py-2 whitespace-nowrap font-medium">主に誰が使う？</td>
-                                                <td class="px-4 py-2">個人、学生、趣味、オープンソース開発者</td>
-                                                <td class="px-4 py-2">製品組込企業</td>
-                                                <td class="px-4 py-2">AGPLは個人利用向け</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-gs-install">
-                                <span>Ghostscriptのダウンロードとインストール</span>
-                                <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                            </button>
-                            <div id="accordion-gs-install" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-4">
-                                <h4 class="font-semibold text-slate-700">1. 公式サイトからダウンロード:</h4>
-                                <p>Ghostscript公式サイト <a href="https://ghostscript.com/releases/gsdnld.html" target="_blank" class="text-sky-600 hover:underline">ghostscript.com/releases/gsdnld.html</a> にアクセスします。</p>
-                                <p>「Ghostscript AGPL Release」セクションを探し、お使いのWindowsのシステムタイプ（Part 1で確認した32ビット/64ビット）に合ったインストーラーをダウンロードします。(例: 64ビット版なら <code>gsXXXXw64.exe</code>)</p>
-
-                                <h4 class="font-semibold text-slate-700">2. インストーラーの実行:</h4>
-                                <ol class="list-decimal list-inside space-y-2 pl-4">
-                                    <li>ダウンロードした <code>.exe</code> ファイルをダブルクリックして実行します。</li>
-                                    <li>許可を求められたら「はい」をクリック。</li>
-                                    <li>セットアップウィザードで「Next」をクリック。</li>
-                                    <li>ライセンス契約（AGPL）を読み、同意なら「I Agree」をクリック。</li>
-                                    <li>インストール場所（通常は <code>C:\Program Files\gs\gsX.XX</code>）を確認し、「Install」をクリック。</li>
-                                    <li>インストール完了を待ちます。</li>
-                                    <li>最後の画面で「Generate cidfmap for Windows CJK TrueType fonts」のオプションがあれば、日本語等の文書を扱う場合はチェックしておくと良いでしょう。「Finish」をクリック。</li>
-                                </ol>
-
-                                <h4 class="font-semibold text-slate-700">3. インストールの確認:</h4>
-                                <p>新しいコマンドプロンプトを開き、<code>gswin64c -h</code> (64ビット版の場合) または <code>gswin32c -h</code> (32ビット版の場合) を実行してバージョン情報が表示されるか確認します。</p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-gs-path-manual">
-                                <span>GhostscriptのPATHを手動で設定する方法</span>
-                                <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                            </button>
-                            <div id="accordion-gs-path-manual" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-4">
-                                <p>GhostscriptのインストーラーがPATHを自動設定しない場合や、コマンドが機能しない場合は手動で設定します。</p>
-                                <h4 class="font-semibold text-slate-700">1. Ghostscriptの重要なフォルダーを確認:</h4>
-                                <p>通常、以下の2つのフォルダーをPATHに追加します:</p>
-                                <ul class="list-disc list-inside space-y-1 pl-4">
-                                    <li><code>bin</code> フォルダー (実行ファイルがある場所):<br>例: <code>C:\Program Files\gs\gsX.XX\bin</code></li>
-                                    <li><code>lib</code> フォルダー (重要なサポートファイルがある場所):<br>例: <code>C:\Program Files\gs\gsX.XX\lib</code></li>
-                                </ul>
-                                <p class="text-sm italic">Pythonと違い、Ghostscriptは<code>bin</code>と<code>lib</code>の両方をPATHに含めることが推奨されます。</p>
-
-                                <h4 class="font-semibold text-slate-700">2. PATHへの追加手順 (GUI):</h4>
-                                <ol class="list-decimal list-inside space-y-2 pl-4">
-                                    <li>「環境変数」ウィンドウを開きます (Part 3参照)。</li>
-                                    <li>「ユーザー環境変数」で「Path」を選択し、「編集...」。</li>
-                                    <li>「新規」をクリックし、Ghostscriptの<code>bin</code>フォルダーのフルパスを追加。Enter。</li>
-                                    <li>再度「新規」をクリックし、Ghostscriptの<code>lib</code>フォルダーのフルパスを追加。Enter。</li>
-                                    <li>全てのウィンドウで「OK」をクリックして保存。</li>
-                                </ol>
-                                <h4 class="font-semibold text-slate-700">3. 設定の確認:</h4>
-                                <p><strong>必ず新しい</strong>コマンドプロンプトを開き、<code>gswin64c -h</code> (または <code>gswin32c -h</code>) を実行して動作を確認します。</p>
-                                <div class="p-3 bg-sky-100 border-l-4 border-sky-500 text-sky-700 rounded-r-md">
-                                    <h5 class="font-semibold">Ghostscriptインストール状況のクイックチェック:</h5>
-                                    <ul class="list-disc list-inside text-sm space-y-1">
-                                        <li>Ghostscriptはインストールされましたか？</li>
-                                        <li>バージョンとインストール場所はわかりますか？</li>
-                                        <li>PATHは正しく設定されましたか（<code>bin</code> と <code>lib</code> の両方）？</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section id="part5" class="content-section space-y-6">
-                        <h2 class="text-2xl font-bold text-sky-600 border-b-2 border-sky-200 pb-2">Part 5: 最終チェック - さあ、準備は万端？</h2>
-                        <p class="leading-relaxed">PythonとGhostscriptのインストール、そしてPATHの設定が無事に完了したか、最後に確認しましょう。コマンドプロンプトからそれぞれのプログラムを呼び出せるかテストします。これがうまくいけば、あなたのPCはこれらの強力なツールを使う準備が整ったことになります！</p>
-                        
-                        <div class="p-4 bg-slate-100 rounded-lg shadow">
-                            <h3 class="text-xl font-semibold text-sky-700 mb-3">クイックテスト: Python</h3>
-                            <p class="mb-2">新しいコマンドプロンプトを開き、以下のコマンドを入力してください:</p>
-                            <div class="my-2 p-3 bg-slate-800 text-slate-100 rounded-md relative">
-                                <code class="block whitespace-pre-wrap">python --version</code>
-                                <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded" data-command="python --version">
-                                    コピー <span class="tooltip">コピーしました!</span>
-                                </button>
-                            </div>
-                            <p>Pythonのバージョン情報（例: <code>Python 3.12.2</code>）が返ってくれば成功です！</p>
-                        </div>
-
-                        <div class="p-4 bg-slate-100 rounded-lg shadow">
-                            <h3 class="text-xl font-semibold text-sky-700 mb-3">クイックテスト: Ghostscript</h3>
-                            <p class="mb-2">同じコマンドプロンプトで、インストールしたバージョンに合わせて以下のコマンドを入力してください (64ビット版の場合):</p>
-                            <div class="my-2 p-3 bg-slate-800 text-slate-100 rounded-md relative">
-                                <code class="block whitespace-pre-wrap">gswin64c -h</code>
-                                <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded" data-command="gswin64c -h">
-                                    コピー <span class="tooltip">コピーしました!</span>
-                                </button>
-                            </div>
-                            <p class="text-sm italic">(32ビット版をインストールした場合は <code>gswin32c -h</code> を使用してください)</p>
-                            <p class="mt-2">Ghostscriptのバージョン情報とヘルプテキストが表示されれば成功です！</p>
-                        </div>
-                        <div class="p-3 bg-sky-100 border-l-4 border-sky-500 text-sky-700 rounded-r-md">
-                            <h5 class="font-semibold">ワンポイントアドバイス:</h5>
-                            <p class="text-sm">PATH変数を変更した後は、その変更を有効にするために、開いているコマンドプロンプトのウィンドウを一度閉じてから新しく開く必要があります。それでもうまくいかない場合は、PCを再起動すると、すべてのプログラムが新しいPATH設定を認識するのに役立つことがあります。</p>
-                        </div>
-                    </section>
-
-                    <section id="part6" class="content-section space-y-6">
-                        <h2 class="text-2xl font-bold text-sky-600 border-b-2 border-sky-200 pb-2">Part 6: あれれ？よくある小さな問題の解決法</h2>
-                        <p class="leading-relaxed">インストールや設定の過程で、予期せぬ問題に遭遇することもあるかもしれません。このセクションでは、PythonやGhostscriptの導入時によくあるトラブルとその解決策をまとめました。焦らず、一つ一つ確認していきましょう。</p>
-
-                        <div>
-                            <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-ts-python-notfound">
-                                <span>Pythonが「コマンドが見つかりません」またはMicrosoft Storeが開く</span>
-                                <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                            </button>
-                            <div id="accordion-ts-python-notfound" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-3">
-                                <p class="font-semibold">原因:</p>
-                                <ul class="list-disc list-inside pl-4">
-                                    <li>Pythonがインストールされていない。</li>
-                                    <li>インストール時に「Add Python to PATH」にチェックを入れ忘れた。</li>
-                                    <li>PATHが手動で正しく設定されていない。</li>
-                                    <li>Windowsの「アプリ実行エイリアス」が原因の場合もある。</li>
-                                </ul>
-                                <p class="font-semibold mt-2">解決策:</p>
-                                <ol class="list-decimal list-inside space-y-1 pl-4">
-                                    <li>Pythonが実際にインストールされているか確認 (<code>C:\Users\&lt;ユーザー名&gt;\AppData\Local\Programs\Python</code> など)。</li>
-                                    <li>Part 3の「PythonのPATHを手動で設定する方法」を再確認 (メインフォルダーと<code>Scripts</code>フォルダーの両方)。</li>
-                                    <li>PATH変更後はコマンドプロンプトを再起動。</li>
-                                    <li>最終手段として、Pythonインストーラーを再実行し、「Add Python to PATH」にチェックを入れる。</li>
-                                    <li>コマンドプロンプトで <code>py --version</code> を試してみる。</li>
-                                    <li>Windows設定で「アプリ実行エイリアスの管理」を検索し、Pythonのエイリアスをオフにしてみる。</li>
-                                </ol>
-                            </div>
-                        </div>
-                        <div>
-                            <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-ts-gs-notfound">
-                                <span>Ghostscriptが「コマンドが見つかりません」</span>
-                                <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                            </button>
-                            <div id="accordion-ts-gs-notfound" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-3">
-                                <p class="font-semibold">原因:</p>
-                                <ul class="list-disc list-inside pl-4">
-                                    <li>Ghostscriptがインストールされていない。</li>
-                                    <li>Ghostscriptの<code>bin</code>および<code>lib</code>フォルダーがPATHに正しく設定されていない。</li>
-                                </ul>
-                                <p class="font-semibold mt-2">解決策:</p>
-                                <ol class="list-decimal list-inside space-y-1 pl-4">
-                                    <li>Ghostscriptがインストールされているか確認 (通常は <code>C:\Program Files\gs\</code>)。</li>
-                                    <li>Part 4の「GhostscriptのPATHを手動で設定する方法」を再確認 (<code>bin</code>フォルダーと<code>lib</code>フォルダーの両方)。</li>
-                                    <li>PATH変更後はコマンドプロンプトを再起動。</li>
-                                    <li>正しいコマンド (<code>gswin64c -h</code> または <code>gswin32c -h</code>) を使用しているか確認。</li>
-                                </ol>
-                            </div>
-                        </div>
-                        <div>
-                            <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-ts-path-general">
-                                <span>PATHがうまく機能しない場合の一般的なヒント</span>
-                                <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                            </button>
-                            <div id="accordion-ts-path-general" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-3">
-                                <ul class="list-disc list-inside pl-4 space-y-1">
-                                    <li><strong>タイプミス確認:</strong> PATHに追加したフォルダーパスに誤りがないか、一文字ずつ確認してください。</li>
-                                    <li><strong>セミコロン:</strong> (古いWindowsの表示の場合) パスはセミコロン<code>;</code>で区切られます。過不足がないか確認。</li>
-                                    <li><strong>順番:</strong> PATHは上から順に検索されます。通常は問題になりませんが、同名プログラムが複数ある場合は注意。</li>
-                                    <li><strong>ユーザーPATH vs システムPATH:</strong> 編集したPATHの種類（ユーザー/システム）と現在のログインユーザーを確認。通常はユーザーPATHが安全です。</li>
-                                    <li><strong>PC再起動:</strong> どうしてもうまくいかない場合、PCを再起動すると解決することがあります。</li>
-                                </ul>
-                                <p class="mt-2">これらのエラーは初心者がよく遭遇するものですが、原因を理解し、一つ一つ確認していけば必ず解決できます。焦らず、手順を見直してみてください。</p>
-                            </div>
-                        </div>
-                        <div class="mt-8 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-r-md">
-                            <h3 class="text-xl font-semibold mb-2">総まとめ: やりましたね！</h3>
-                            <p>自分自身を褒めてあげてください！あなたはPython、Ghostscript、そして謎めいたPATH変数の世界をうまく乗り越えました。ソフトウェアの確認方法、インストール方法、PCにその場所を教える方法、そして基本的なトラブルシューティングまで学びました。これは素晴らしい成果です！</p>
-                            <p class="mt-2">これで、いくつかの強力なツールを使う準備が整いました。さあ、それらで何ができるか探求してみましょう！</p>
-                        </div>
-                    </section>
-
-                    <section id="part7" class="content-section space-y-6">
-                        <h2 class="text-2xl font-bold text-sky-600 border-b-2 border-sky-200 pb-2">Part 7: クイックリファレンス - 手順早見表</h2>
-                        <p class="leading-relaxed">ここまでの重要な手順を一覧にまとめました。設定を見直したい時や、後で手順を再確認したい時にご活用ください。</p>
-                        <ul class="space-y-4">
-                            <li><strong>Windowsバージョン確認 (32/64ビット):</strong> スタート > 設定 > システム > バージョン情報 > 「システムの種類」。</li>
-                            <li><strong>Pythonインストール確認:</strong> コマンドプロンプトで <code>python --version</code> および <code>where python</code>。</li>
-                            <li><strong>Pythonインストール:</strong> <a href="https://www.python.org/downloads/" target="_blank" class="text-sky-600 hover:underline">python.org</a> からダウンロード。インストーラー実行時、<strong>「Add Python to PATH」に必ずチェック</strong>。</li>
-                            <li><strong>Ghostscriptインストール確認:</strong> コマンドプロンプトで <code>gswin64c -h</code> (64bit) / <code>gswin32c -h</code> (32bit)。デフォルト場所: <code>C:\Program Files\gs\gsX.XX</code>。</li>
-                            <li><strong>Ghostscriptインストール:</strong> <a href="https://ghostscript.com/releases/gsdnld.html" target="_blank" class="text-sky-600 hover:underline">ghostscript.com</a> からAGPL版をダウンロード (32/64bit合わせる)。CJKフォントオプションあればチェック。</li>
-                            <li><strong>PATH環境変数編集 (ユーザーPATH):</strong> Windows検索「環境変数」> システム環境変数の編集 > 詳細設定 > 環境変数... > ユーザー環境変数の「Path」を選択し編集。
-                                <ul class="list-disc list-inside pl-6 mt-1 space-y-1 text-sm">
-                                    <li><strong>Python手動PATH追加:</strong> Pythonメインフォルダー (例: <code>C:\Users\...\Python\PythonXX</code>) と <code>Scripts</code>フォルダー (例: <code>C:\Users\...\Python\PythonXX\Scripts</code>) を追加。</li>
-                                    <li><strong>Ghostscript手動PATH追加:</strong> Ghostscript <code>bin</code>フォルダー (例: <code>C:\Program Files\gs\gsX.XX\bin</code>) と <code>lib</code>フォルダー (例: <code>C:\Program Files\gs\gsX.XX\lib</code>) を追加。</li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </section>
-
-                    <section id="part8" class="content-section space-y-4">
-                        <h2 class="text-2xl font-bold text-sky-600 border-b-2 border-sky-200 pb-2">Part 8: あなたの便利なIT用語集 (やさしく解説！)</h2>
-                        <p class="leading-relaxed">このガイドで使われたIT用語を、初心者の方にも分かりやすく解説します。これで専門用語も怖くない！</p>
-                        <div class="space-y-3">
-                            <div class="term-item">
-                                <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-32-64bit">
-                                    <span>32ビット / 64ビット</span>
-                                    <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                                </button>
-                                <div id="term-32-64bit" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
-                                    PCのプロセッサーが一度に扱えるデータ量。64ビットの方が新しく高性能。通常、システムに合ったソフトウェアを選びます。
-                                </div>
-                            </div>
-                            <div class="term-item">
-                                <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-agpl">
-                                    <span>AGPL (GNU Affero General Public License)</span>
-                                    <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                                </button>
-                                <div id="term-agpl" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
-                                    無料のオープンソースライセンスの一種。Ghostscriptの場合、個人利用は無料。改変版をネットワーク配布する場合などに条件あり。
-                                </div>
-                            </div>
-                            <div class="term-item">
-                                <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-cmd">
-                                    <span>コマンドプロンプト (CMD)</span>
-                                    <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                                </button>
-                                <div id="term-cmd" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
-                                    テキストコマンドでPCに指示を出すためのWindowsプログラム。PCの脳への直通電話のようなもの。
-                                </div>
-                            </div>
-                            <div class="term-item">
-                                <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-directory">
-                                    <span>ディレクトリ / フォルダー</span>
-                                    <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                                </button>
-                                <div id="term-directory" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
-                                    ファイルや他のフォルダーを保存する場所。デジタルファイリングキャビネットのようなもの。
-                                </div>
-                            </div>
-                            <div class="term-item">
-                                <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-envvar">
-                                    <span>環境変数</span>
-                                    <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                                </button>
-                                <div id="term-envvar" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
-                                    OSが保存している特別な情報で、プログラムがシステム設定などを取得するために使用。PATHもその一つ。
-                                </div>
-                            </div>
-                            <div class="term-item">
-                                <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-exe">
-                                    <span>実行ファイル (.exe)</span>
-                                    <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                                </button>
-                                <div id="term-exe" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
-                                    PCが実行できるプログラムを含むファイル。ダブルクリックでプログラムやインストーラーが起動。
-                                </div>
-                            </div>
-                            <div class="term-item">
-                                <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-ghostscript">
-                                    <span>Ghostscript</span>
-                                    <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                                </button>
-                                <div id="term-ghostscript" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
-                                    PDFやPostScriptファイル（印刷やグラフィック用）を他のソフトウェアが扱うのを助ける舞台裏プログラム。
-                                </div>
-                            </div>
-                            <div class="term-item">
-                                <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-installer">
-                                    <span>インストーラー</span>
-                                    <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                                </button>
-                                <div id="term-installer" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
-                                    他のソフトウェアをPCにセットアップ（インストール）するのを助けるプログラム。
-                                </div>
-                            </div>
-                            <div class="term-item">
-                                <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-opensource">
-                                    <span>オープンソース</span>
-                                    <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                                </button>
-                                <div id="term-opensource" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
-                                    元のコード（プログラムの設計図）が無料で公開されているソフトウェア。PythonやAGPL版Ghostscriptなど。
-                                </div>
-                            </div>
-                            <div class="term-item">
-                                <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-path">
-                                    <span>PATH (環境変数)</span>
-                                    <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                                </button>
-                                <div id="term-path" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
-                                    Windowsがプログラムを探すときにチェックするフォルダーの場所のリスト。プログラムの「住所録」。
-                                </div>
-                            </div>
-                            <div class="term-item">
-                                <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-setpath">
-                                    <span>「PATHを通す」</span>
-                                    <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                                </button>
-                                <div id="term-setpath" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
-                                    フォルダーの場所をPATH環境変数に追加すること。これによりWindowsがそのフォルダー内のプログラムを簡単に見つけられる。
-                                </div>
-                            </div>
-                            <div class="term-item">
-                                <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-pip">
-                                    <span>pip</span>
-                                    <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                                </button>
-                                <div id="term-pip" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
-                                    Pythonの追加パッケージ（ライブラリ）をインストール・管理するためのツール。Pythonと一緒にインストールされる。
-                                </div>
-                            </div>
-                            <div class="term-item">
-                                <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-python">
-                                    <span>Python</span>
-                                    <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
-                                </button>
-                                <div id="term-python" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
-                                    ウェブ開発、データサイエンス、AIなど多用途で人気のあるプログラミング言語。比較的学びやすい。
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section id="no-content" class="content-section text-center py-10">
-                        <img src="/api/placeholder/120/120" alt="準備中アイコン" class="mx-auto mb-4 rounded-full">
-                        <h2 class="text-2xl font-semibold text-sky-700">コンテンツを選択してください</h2>
-                        <p class="text-slate-600 mt-2">左の目次から、表示したい項目を選んでください。</p>
-                    </section>
-                </main>
-            </div>
-        </div>
-
-        <!-- インフォグラフィックビューのコンテンツ -->
-        <div id="infographicContent" class="view-content hidden">
-            <div class="container mx-auto p-4 md:p-8 max-w-4xl">
-                <section class="mb-16">
-                    <h2 class="text-3xl font-bold section-title mb-6 text-center">🚀 まずは知っておこう！</h2>
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="card p-6 rounded-lg shadow-lg">
-                            <h3 class="text-2xl font-semibold primary-text mb-2">🐍 Pythonって何？</h3>
-                            <p class="text-gray-700">読みやすくて強力なプログラミング言語。ウェブサイト作りからデータ分析、AI開発まで、色々なことができる万能ツールだよ！</p>
-                        </div>
-                        <div class="card p-6 rounded-lg shadow-lg">
-                            <h3 class="text-2xl font-semibold primary-text mb-2">👻 Ghostscriptって何？</h3>
-                            <p class="text-gray-700">PDFや印刷ファイル形式を扱うための縁の下の力持ち。他のソフトがこれらのファイルを見るのを助けるよ！</p>
+                    </div>
+                     <div>
+                        <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-terms-intro">
+                            <span>これから使う大切な用語</span>
+                            <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                        </button>
+                        <div id="accordion-terms-intro" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md">
+                            <p>このガイドを進める中で、いくつかの専門用語が出てくるかもしれません。「コマンドプロンプト」「PATH」「インストーラー」「ディレクトリ」などです。でも心配いりません！その都度説明しますし、最後には詳しい「用語集」も用意していますので、安心して進めてくださいね。</p>
                         </div>
                     </div>
                 </section>
 
-                <section class="mb-16">
-                    <h2 class="text-3xl font-bold section-title mb-8 text-center">🛠️ Step 1: PCの準備体操！</h2>
-                    <div class="card p-6 rounded-lg shadow-lg">
-                        <h3 class="text-2xl font-semibold primary-text mb-4">PCは32ビット？64ビット？</h3>
-                        <p class="text-gray-700 mb-4">ソフトウェアをダウンロードする前に、PCのシステムタイプを確認しよう！</p>
-                        <div class="bg-sky-50 p-4 rounded-md border border-sky-200">
-                            <p class="font-semibold text-sky-700">確認方法 (Windows 10/11):</p>
-                            <ol class="list-decimal list-inside text-gray-700 space-y-1 mt-2">
-                                <li>「スタート」→「設定」(⚙️)</li>
-                                <li>「システム」→「バージョン情報」(または「詳細情報」)</li>
-                                <li>「システムの種類」項目で確認！ (例: 64ビット オペレーティングシステム)</li>
+                <section id="part2" class="content-section space-y-6">
+                    <h2 class="text-2xl font-bold text-sky-600 border-b-2 border-sky-200 pb-2">Part 2: Python - あなたの新しい武器！</h2>
+                    <p class="leading-relaxed">Pythonは、プログラミング言語の一つで、ウェブサイト開発からデータ分析、AIまで幅広く使われている人気のツールです。初心者にも比較的学びやすいと言われています。このセクションでは、Pythonが既にPCにインストールされているかの確認方法、そして公式サイトからのダウンロードとインストール手順を詳しく解説します。</p>
+
+                    <div>
+                        <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-python-what">
+                            <span>Pythonって、そもそも何？</span>
+                            <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                        </button>
+                        <div id="accordion-python-what" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md">
+                            <p>Pythonは、コンピューターに指示を与えるための言葉のようなものです。読みやすく書きやすい構文が特徴で、Googleのような大企業も様々な用途で活用しています。無料で利用でき、豊富な「ライブラリ」（便利なコードの部品集）によって、複雑な作業も比較的簡単に行えます。</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-python-check">
+                            <span>Pythonがインストール済みか確認</span>
+                            <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                        </button>
+                        <div id="accordion-python-check" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-4">
+                            <h4 class="font-semibold text-slate-700">コマンドプロンプトで確認:</h4>
+                            <ol class="list-decimal list-inside space-y-1 pl-4">
+                                <li>Windowsの検索バーに「<code>cmd</code>」と入力し、「コマンドプロンプト」を開きます。</li>
+                                <li>黒い画面に以下のコマンドを入力し、Enterキーを押します:
+                                    <div class="my-2 p-3 bg-slate-800 text-slate-100 rounded-md relative">
+                                        <code class="block whitespace-pre-wrap">python --version</code>
+                                        <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded" data-command="python --version">
+                                            コピー <span class="tooltip">コピーしました!</span>
+                                        </button>
+                                    </div>
+                                    (または <code>python -V</code> でもOK)
+                                </li>
+                                <li>「Python 3.x.x」のようにバージョンが表示されればインストール済みです。</li>
+                                <li>「'python' は...認識されていません」などのメッセージが出たら、未インストールかPATHが通っていません。</li>
+                            </ol>
+                            <h4 class="font-semibold text-slate-700">インストール場所の確認 (もしインストールされていたら):</h4>
+                             <p>コマンドプロンプトで以下を入力します:</p>
+                            <div class="my-2 p-3 bg-slate-800 text-slate-100 rounded-md relative">
+                                <code class="block whitespace-pre-wrap">where python</code>
+                                <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded" data-command="where python">
+                                    コピー <span class="tooltip">コピーしました!</span>
+                                </button>
+                            </div>
+                            <p><code>C:\Users\&lt;あなたのユーザー名&gt;\AppData\Local\Programs\Python\PythonXX\python.exe</code> のようなパスが表示されます。</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-python-install">
+                            <span>Pythonのダウンロードとインストール</span>
+                            <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                        </button>
+                        <div id="accordion-python-install" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-4">
+                            <h4 class="font-semibold text-slate-700">1. 公式サイトからダウンロード:</h4>
+                            <p>Pythonの公式サイト <a href="https://www.python.org/downloads/" target="_blank" class="text-sky-600 hover:underline">python.org/downloads/</a> にアクセスします。</p>
+                            <p>通常、トップページに最新版のダウンロードボタン（例: "Download Python 3.12.2"）があります。これをクリックすると、お使いのWindowsに合ったインストーラー（通常は64ビット版）がダウンロードされます。</p>
+
+                            <h4 class="font-semibold text-slate-700">2. インストーラーの実行と重要ポイント:</h4>
+                            <ol class="list-decimal list-inside space-y-2 pl-4">
+                                <li>ダウンロードした <code>.exe</code> ファイル（例: <code>python-3.12.2-amd64.exe</code>）をダブルクリックして実行します。</li>
+                                <li class="font-bold text-red-600">超重要: インストーラーの最初の画面の下部にある「Add Python 3.x to PATH」または「Add python.exe to PATH」というチェックボックスに必ずチェックを入れてください！</li>
+                                <img src="https://placehold.co/600x300/e2e8f0/475569?text=Add+Python+to+PATH" alt="PythonインストーラーのPATH追加画面のイメージ" class="my-2 rounded-md shadow" onerror="this.src='https://placehold.co/600x300/e2e8f0/475569?text=イメージプレースホルダー'; this.alt='イメージプレースホルダー'">
+                                <p class="text-sm italic ml-4">このチェックを入れると、コマンドプロンプトでPythonを簡単に使えるようになります。</p>
+                                <li>「Install Now」をクリックして、推奨設定でインストールを進めます。</li>
+                                <li>「このアプリがデバイスに変更を加えることを許可しますか？」と表示されたら「はい」をクリック。</li>
+                                <li>インストール完了後、「Close」をクリックします。</li>
+                            </ol>
+
+                            <h4 class="font-semibold text-slate-700">3. インストールの確認:</h4>
+                            <p>新しいコマンドプロンプトウィンドウを開き（重要！）、再度 <code>python --version</code> を実行してバージョンが表示されるか確認します。</p>
+                            <div class="p-3 bg-sky-100 border-l-4 border-sky-500 text-sky-700 rounded-r-md">
+                                <h5 class="font-semibold">Pythonインストール状況のクイックチェック:</h5>
+                                <ul class="list-disc list-inside text-sm space-y-1">
+                                    <li>Pythonはインストールされましたか？</li>
+                                    <li>バージョンはわかりますか？</li>
+                                    <li>PCはPythonの場所を知っていますか（PATHは設定されましたか）？</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="part3" class="content-section space-y-6">
+                    <h2 class="text-2xl font-bold text-sky-600 border-b-2 border-sky-200 pb-2">Part 3: 「PATH」- プログラムを簡単に見つけられるようにする</h2>
+                    <p class="leading-relaxed">「PATH（パス）を通す」という言葉を聞いたことがありますか？これは、コンピューターがプログラムを簡単に見つけられるようにするための重要な設定です。このセクションでは、環境変数「PATH」とは何か、なぜ重要なのか、そしてPythonのインストール時に設定し忘れた場合に手動で設定する方法を解説します。</p>
+
+                    <div>
+                        <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-path-what">
+                            <span>環境変数とPATHとは？</span>
+                            <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                        </button>
+                        <div id="accordion-path-what" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-3">
+                            <p><strong>環境変数</strong>は、PCの動作に必要な設定情報（ユーザー名、一時ファイルの場所など）を保存するメモ帳のようなものです。</p>
+                            <p><strong>PATH</strong>はその中でも特に重要な環境変数で、プログラムの「住所録」のような役割をします。コマンドプロンプトでプログラム名（例: <code>python</code>）だけを入力したとき、WindowsはこのPATHに登録されたフォルダーを探しに行きます。そこにプログラムがあれば、どこからでも簡単に実行できるのです。</p>
+                            <p class="text-sm italic">PATHが通っていないと、毎回プログラムのフルパス（例: <code>C:\... \python.exe</code>）を入力する必要があり、非常に面倒です。</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-path-check-edit">
+                            <span>現在のPATH設定の確認方法</span>
+                            <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                        </button>
+                        <div id="accordion-path-check-edit" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-3">
+                            <ol class="list-decimal list-inside space-y-1 pl-4">
+                                <li>Windowsの検索バーに「<code>環境変数</code>」と入力します。</li>
+                                <li>「システム環境変数の編集」をクリックします。</li>
+                                <li>「システムのプロパティ」ウィンドウの「詳細設定」タブで、「環境変数...」ボタンをクリックします。</li>
+                                <li>「ユーザー環境変数」と「システム環境変数」のセクションに「Path」（または「PATH」）があります。これを選択し「編集...」をクリックすると、登録されているフォルダーのリストが表示されます。</li>
+                            </ol>
+                            <p class="font-semibold text-red-600">注意: ここでは確認するだけにしましょう。誤った変更はシステムに影響を与える可能性があります。</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-python-path-manual">
+                            <span>PythonのPATHを手動で設定する方法</span>
+                            <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                        </button>
+                        <div id="accordion-python-path-manual" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-4">
+                            <p>インストール時に「Add Python to PATH」にチェックを入れ忘れた場合や、<code>python --version</code>が機能しない場合は、手動で設定します。</p>
+                            <h4 class="font-semibold text-slate-700">1. Pythonの重要なフォルダーを確認:</h4>
+                            <p>通常、以下の2つのフォルダーをPATHに追加します:</p>
+                            <ul class="list-disc list-inside space-y-1 pl-4">
+                                <li>メインのインストールフォルダー (<code>python.exe</code> がある場所):<br>例: <code>C:\Users\&lt;あなたのユーザー名&gt;\AppData\Local\Programs\Python\PythonXX</code> (XXはバージョン)</li>
+                                <li><code>Scripts</code> フォルダー (メインフォルダー内、<code>pip</code>などのツールがある):<br>例: <code>C:\Users\&lt;あなたのユーザー名&gt;\AppData\Local\Programs\Python\PythonXX\Scripts</code></li>
+                            </ul>
+                            <p class="text-sm italic">これらの正確なパスは <code>where python</code> コマンドやファイルエクスプローラーで確認できます。</p>
+
+                            <h4 class="font-semibold text-slate-700">2. PATHへの追加手順 (GUI):</h4>
+                            <ol class="list-decimal list-inside space-y-2 pl-4">
+                                <li>上記「現在のPATH設定の確認方法」の手順で「環境変数」ウィンドウを開きます。</li>
+                                <li>「&lt;あなたのユーザー名&gt; のユーザー環境変数」セクションで「Path」を選択し、「編集...」をクリック。（なければ「新規...」で変数名「Path」を作成）</li>
+                                <li>「環境変数の編集」ウィンドウで「新規」をクリック。</li>
+                                <li>Pythonのメインインストールフォルダーのフルパスを貼り付け、Enter。</li>
+                                <li>再度「新規」をクリック。</li>
+                                <li>Pythonの<code>Scripts</code>フォルダーのフルパスを貼り付け、Enter。</li>
+                                <li>開いている全てのウィンドウ（「環境変数の編集」、「環境変数」、「システムのプロパティ」）で「OK」をクリックして保存します。</li>
+                            </ol>
+                            <div class="p-3 bg-sky-100 border-l-4 border-sky-500 text-sky-700 rounded-r-md">
+                                <h5 class="font-semibold">ワンポイントアドバイス: ユーザーPATHとシステムPATH</h5>
+                                <p class="text-sm">通常は「ユーザー環境変数」のPathに追加するのが安全で推奨されます。これはログイン中のあなただけに影響します。システム環境変数はPCの全ユーザーに影響します。</p>
+                            </div>
+                            <h4 class="font-semibold text-slate-700">3. 設定の確認:</h4>
+                            <p><strong>必ず新しい</strong>コマンドプロンプトを開き、<code>python --version</code> と <code>pip --version</code> を実行して動作を確認します。</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="part4" class="content-section space-y-6">
+                    <h2 class="text-2xl font-bold text-sky-600 border-b-2 border-sky-200 pb-2">Part 4: Ghostscript - あなたの書類や画像の助っ人</h2>
+                    <p class="leading-relaxed">Ghostscriptは、PDFやPostScriptといった文書・画像形式を扱うための重要なソフトウェアです。直接使うことは少ないかもしれませんが、他のプログラムがこれらのファイルを処理する際に裏方として活躍します。このセクションでは、Ghostscriptの役割、ライセンス、インストール確認、そして導入手順を解説します。</p>
+
+                    <div>
+                        <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-gs-what">
+                            <span>Ghostscriptって何？</span>
+                            <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                        </button>
+                        <div id="accordion-gs-what" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md">
+                            <p>Ghostscriptは、PDFファイルやPostScriptファイル（多くのプリンターで使われる言語）を解釈・変換・表示するのを助けるプログラムです。多くのグラフィックソフトやPDF関連ツールが、内部でGhostscriptを利用しています。</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-gs-check">
+                            <span>Ghostscriptがインストール済みか確認</span>
+                            <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                        </button>
+                        <div id="accordion-gs-check" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-4">
+                            <h4 class="font-semibold text-slate-700">コマンドプロンプトで確認:</h4>
+                            <p>お使いのシステムに合わせて、以下のいずれかのコマンドを入力します:</p>
+                            <ul class="list-disc list-inside space-y-2 pl-4">
+                                <li>64ビット版の場合:
+                                    <div class="my-2 p-3 bg-slate-800 text-slate-100 rounded-md relative">
+                                        <code class="block whitespace-pre-wrap">gswin64c -h</code>
+                                        <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded" data-command="gswin64c -h">
+                                            コピー <span class="tooltip">コピーしました!</span>
+                                        </button>
+                                    </div>
+                                </li>
+                                <li>32ビット版の場合:
+                                    <div class="my-2 p-3 bg-slate-800 text-slate-100 rounded-md relative">
+                                        <code class="block whitespace-pre-wrap">gswin32c -h</code>
+                                        <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded" data-command="gswin32c -h">
+                                            コピー <span class="tooltip">コピーしました!</span>
+                                        </button>
+                                    </div>
+                                </li>
+                            </ul>
+                            <p>バージョン情報やヘルプテキストが表示されればインストール済みです。「'gswinXXc' は...認識されていません」と出たら未インストールかPATHが通っていません。</p>
+                            <h4 class="font-semibold text-slate-700">インストール場所の確認 (もしインストールされていたら):</h4>
+                            <p>通常は <code>C:\Program Files\gs\gsX.XX</code> (X.XXはバージョン番号) にインストールされます。実行ファイル (<code>gswin64c.exe</code> 等) はその中の <code>bin</code> フォルダーにあります。</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-gs-license">
+                            <span>Ghostscriptのライセンス (AGPL vs 商用)</span>
+                            <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                        </button>
+                        <div id="accordion-gs-license" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-3">
+                            <p>Ghostscriptには主に2つのライセンスがあります:</p>
+                            <ul class="list-disc list-inside space-y-2 pl-4">
+                                <li><strong>AGPL (GNU Affero General Public License):</strong> 無料のオープンソース版です。個人のPCで使う分にはこれで全く問題ありません。もしAGPL版Ghostscriptを改変してネットワークサービスとして提供する場合などは、ソースコードの公開が必要になることがあります。</li>
+                                <li><strong>商用ライセンス:</strong> Artifex社から購入する有料ライセンスです。企業がGhostscriptを自社製品に組み込んで販売する場合や、ソースコードを公開したくない場合などに利用されます。</li>
+                            </ul>
+                            <p class="font-semibold">個人利用であれば、AGPL版を選んで問題ありません。</p>
+                            <div class="overflow-x-auto mt-3">
+                                <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
+                                    <thead class="bg-gray-100">
+                                        <tr>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">特徴</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">AGPL Ghostscript</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">商用 Ghostscript</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">あなたにとって (個人利用)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200 text-sm">
+                                        <tr>
+                                            <td class="px-4 py-2 whitespace-nowrap font-medium">費用</td>
+                                            <td class="px-4 py-2 whitespace-nowrap">無料</td>
+                                            <td class="px-4 py-2 whitespace-nowrap">有料</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sky-700 font-semibold">AGPLが最適</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2 whitespace-nowrap font-medium">自分のPCで使う</td>
+                                            <td class="px-4 py-2 whitespace-nowrap">問題なし</td>
+                                            <td class="px-4 py-2 whitespace-nowrap">問題なし</td>
+                                            <td class="px-4 py-2 whitespace-nowrap">AGPLを選びましょう</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2 whitespace-nowrap font-medium">ソフトウェア開発・配布</td>
+                                            <td class="px-4 py-2">改変版利用時、コード共有の可能性あり</td>
+                                            <td class="px-4 py-2">コード共有不要</td>
+                                            <td class="px-4 py-2">個人利用では通常関係なし</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2 whitespace-nowrap font-medium">主に誰が使う？</td>
+                                            <td class="px-4 py-2">個人、学生、趣味、オープンソース開発者</td>
+                                            <td class="px-4 py-2">製品組込企業</td>
+                                            <td class="px-4 py-2">AGPLは個人利用向け</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-gs-install">
+                            <span>Ghostscriptのダウンロードとインストール</span>
+                            <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                        </button>
+                        <div id="accordion-gs-install" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-4">
+                            <h4 class="font-semibold text-slate-700">1. 公式サイトからダウンロード:</h4>
+                            <p>Ghostscript公式サイト <a href="https://ghostscript.com/releases/gsdnld.html" target="_blank" class="text-sky-600 hover:underline">ghostscript.com/releases/gsdnld.html</a> にアクセスします。</p>
+                            <p>「Ghostscript AGPL Release」セクションを探し、お使いのWindowsのシステムタイプ（Part 1で確認した32ビット/64ビット）に合ったインストーラーをダウンロードします。(例: 64ビット版なら <code>gsXXXXw64.exe</code>)</p>
+
+                            <h4 class="font-semibold text-slate-700">2. インストーラーの実行:</h4>
+                            <ol class="list-decimal list-inside space-y-2 pl-4">
+                                <li>ダウンロードした <code>.exe</code> ファイルをダブルクリックして実行します。</li>
+                                <li>許可を求められたら「はい」をクリック。</li>
+                                <li>セットアップウィザードで「Next」をクリック。</li>
+                                <li>ライセンス契約（AGPL）を読み、同意なら「I Agree」をクリック。</li>
+                                <li>インストール場所（通常は <code>C:\Program Files\gs\gsX.XX</code>）を確認し、「Install」をクリック。</li>
+                                <li>インストール完了を待ちます。</li>
+                                <li>最後の画面で「Generate cidfmap for Windows CJK TrueType fonts」のオプションがあれば、日本語等の文書を扱う場合はチェックしておくと良いでしょう。「Finish」をクリック。</li>
+                            </ol>
+
+                            <h4 class="font-semibold text-slate-700">3. インストールの確認:</h4>
+                            <p>新しいコマンドプロンプトを開き、<code>gswin64c -h</code> (64ビット版の場合) または <code>gswin32c -h</code> (32ビット版の場合) を実行してバージョン情報が表示されるか確認します。</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-gs-path-manual">
+                            <span>GhostscriptのPATHを手動で設定する方法</span>
+                            <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                        </button>
+                        <div id="accordion-gs-path-manual" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-4">
+                            <p>GhostscriptのインストーラーがPATHを自動設定しない場合や、コマンドが機能しない場合は手動で設定します。</p>
+                            <h4 class="font-semibold text-slate-700">1. Ghostscriptの重要なフォルダーを確認:</h4>
+                            <p>通常、以下の2つのフォルダーをPATHに追加します:</p>
+                            <ul class="list-disc list-inside space-y-1 pl-4">
+                                <li><code>bin</code> フォルダー (実行ファイルがある場所):<br>例: <code>C:\Program Files\gs\gsX.XX\bin</code></li>
+                                <li><code>lib</code> フォルダー (重要なサポートファイルがある場所):<br>例: <code>C:\Program Files\gs\gsX.XX\lib</code></li>
+                            </ul>
+                            <p class="text-sm italic">Pythonと違い、Ghostscriptは<code>bin</code>と<code>lib</code>の両方をPATHに含めることが推奨されます。</p>
+
+                            <h4 class="font-semibold text-slate-700">2. PATHへの追加手順 (GUI):</h4>
+                            <ol class="list-decimal list-inside space-y-2 pl-4">
+                                <li>「環境変数」ウィンドウを開きます (Part 3参照)。</li>
+                                <li>「ユーザー環境変数」で「Path」を選択し、「編集...」。</li>
+                                <li>「新規」をクリックし、Ghostscriptの<code>bin</code>フォルダーのフルパスを追加。Enter。</li>
+                                <li>再度「新規」をクリックし、Ghostscriptの<code>lib</code>フォルダーのフルパスを追加。Enter。</li>
+                                <li>全てのウィンドウで「OK」をクリックして保存。</li>
+                            </ol>
+                            <h4 class="font-semibold text-slate-700">3. 設定の確認:</h4>
+                            <p><strong>必ず新しい</strong>コマンドプロンプトを開き、<code>gswin64c -h</code> (または <code>gswin32c -h</code>) を実行して動作を確認します。</p>
+                             <div class="p-3 bg-sky-100 border-l-4 border-sky-500 text-sky-700 rounded-r-md">
+                                <h5 class="font-semibold">Ghostscriptインストール状況のクイックチェック:</h5>
+                                <ul class="list-disc list-inside text-sm space-y-1">
+                                    <li>Ghostscriptはインストールされましたか？</li>
+                                    <li>バージョンとインストール場所はわかりますか？</li>
+                                    <li>PATHは正しく設定されましたか（<code>bin</code> と <code>lib</code> の両方）？</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="part5" class="content-section space-y-6">
+                    <h2 class="text-2xl font-bold text-sky-600 border-b-2 border-sky-200 pb-2">Part 5: 最終チェック - さあ、準備は万端？</h2>
+                    <p class="leading-relaxed">PythonとGhostscriptのインストール、そしてPATHの設定が無事に完了したか、最後に確認しましょう。コマンドプロンプトからそれぞれのプログラムを呼び出せるかテストします。これがうまくいけば、あなたのPCはこれらの強力なツールを使う準備が整ったことになります！</p>
+                    
+                    <div class="p-4 bg-slate-100 rounded-lg shadow">
+                        <h3 class="text-xl font-semibold text-sky-700 mb-3">クイックテスト: Python</h3>
+                        <p class="mb-2">新しいコマンドプロンプトを開き、以下のコマンドを入力してください:</p>
+                        <div class="my-2 p-3 bg-slate-800 text-slate-100 rounded-md relative">
+                            <code class="block whitespace-pre-wrap">python --version</code>
+                            <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded" data-command="python --version">
+                                コピー <span class="tooltip">コピーしました!</span>
+                            </button>
+                        </div>
+                        <p>Pythonのバージョン情報（例: <code>Python 3.12.2</code>）が返ってくれば成功です！</p>
+                    </div>
+
+                    <div class="p-4 bg-slate-100 rounded-lg shadow">
+                        <h3 class="text-xl font-semibold text-sky-700 mb-3">クイックテスト: Ghostscript</h3>
+                        <p class="mb-2">同じコマンドプロンプトで、インストールしたバージョンに合わせて以下のコマンドを入力してください (64ビット版の場合):</p>
+                        <div class="my-2 p-3 bg-slate-800 text-slate-100 rounded-md relative">
+                            <code class="block whitespace-pre-wrap">gswin64c -h</code>
+                            <button class="copy-btn absolute top-2 right-2 bg-slate-600 hover:bg-slate-500 text-white text-xs px-2 py-1 rounded" data-command="gswin64c -h">
+                                コピー <span class="tooltip">コピーしました!</span>
+                            </button>
+                        </div>
+                         <p class="text-sm italic">(32ビット版をインストールした場合は <code>gswin32c -h</code> を使用してください)</p>
+                        <p class="mt-2">Ghostscriptのバージョン情報とヘルプテキストが表示されれば成功です！</p>
+                    </div>
+                    <div class="p-3 bg-sky-100 border-l-4 border-sky-500 text-sky-700 rounded-r-md">
+                        <h5 class="font-semibold">ワンポイントアドバイス:</h5>
+                        <p class="text-sm">PATH変数を変更した後は、その変更を有効にするために、開いているコマンドプロンプトのウィンドウを一度閉じてから新しく開く必要があります。それでもうまくいかない場合は、PCを再起動すると、すべてのプログラムが新しいPATH設定を認識するのに役立つことがあります。</p>
+                    </div>
+                </section>
+
+                <section id="part6" class="content-section space-y-6">
+                    <h2 class="text-2xl font-bold text-sky-600 border-b-2 border-sky-200 pb-2">Part 6: あれれ？よくある小さな問題の解決法</h2>
+                    <p class="leading-relaxed">インストールや設定の過程で、予期せぬ問題に遭遇することもあるかもしれません。このセクションでは、PythonやGhostscriptの導入時によくあるトラブルとその解決策をまとめました。焦らず、一つ一つ確認していきましょう。</p>
+
+                    <div>
+                        <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-ts-python-notfound">
+                            <span>Pythonが「コマンドが見つかりません」またはMicrosoft Storeが開く</span>
+                            <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                        </button>
+                        <div id="accordion-ts-python-notfound" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-3">
+                            <p class="font-semibold">原因:</p>
+                            <ul class="list-disc list-inside pl-4">
+                                <li>Pythonがインストールされていない。</li>
+                                <li>インストール時に「Add Python to PATH」にチェックを入れ忘れた。</li>
+                                <li>PATHが手動で正しく設定されていない。</li>
+                                <li>Windowsの「アプリ実行エイリアス」が原因の場合もある。</li>
+                            </ul>
+                            <p class="font-semibold mt-2">解決策:</p>
+                            <ol class="list-decimal list-inside space-y-1 pl-4">
+                                <li>Pythonが実際にインストールされているか確認 (<code>C:\Users\&lt;ユーザー名&gt;\AppData\Local\Programs\Python</code> など)。</li>
+                                <li>Part 3の「PythonのPATHを手動で設定する方法」を再確認 (メインフォルダーと<code>Scripts</code>フォルダーの両方)。</li>
+                                <li>PATH変更後はコマンドプロンプトを再起動。</li>
+                                <li>最終手段として、Pythonインストーラーを再実行し、「Add Python to PATH」にチェックを入れる。</li>
+                                <li>コマンドプロンプトで <code>py --version</code> を試してみる。</li>
+                                <li>Windows設定で「アプリ実行エイリアスの管理」を検索し、Pythonのエイリアスをオフにしてみる。</li>
                             </ol>
                         </div>
-                        <p class="text-sm text-gray-600 mt-3 italic">最近のPCはほとんど64ビットだよ。Windows 11は64ビットのみ！</p>
+                    </div>
+                    <div>
+                        <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-ts-gs-notfound">
+                            <span>Ghostscriptが「コマンドが見つかりません」</span>
+                            <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                        </button>
+                        <div id="accordion-ts-gs-notfound" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-3">
+                            <p class="font-semibold">原因:</p>
+                             <ul class="list-disc list-inside pl-4">
+                                <li>Ghostscriptがインストールされていない。</li>
+                                <li>Ghostscriptの<code>bin</code>および<code>lib</code>フォルダーがPATHに正しく設定されていない。</li>
+                            </ul>
+                            <p class="font-semibold mt-2">解決策:</p>
+                            <ol class="list-decimal list-inside space-y-1 pl-4">
+                                <li>Ghostscriptがインストールされているか確認 (通常は <code>C:\Program Files\gs\</code>)。</li>
+                                <li>Part 4の「GhostscriptのPATHを手動で設定する方法」を再確認 (<code>bin</code>フォルダーと<code>lib</code>フォルダーの両方)。</li>
+                                <li>PATH変更後はコマンドプロンプトを再起動。</li>
+                                <li>正しいコマンド (<code>gswin64c -h</code> または <code>gswin32c -h</code>) を使用しているか確認。</li>
+                            </ol>
+                        </div>
+                    </div>
+                     <div>
+                        <button class="accordion-button w-full text-left text-xl font-semibold text-sky-700 p-3 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="accordion-ts-path-general">
+                            <span>PATHがうまく機能しない場合の一般的なヒント</span>
+                            <span class="accordion-icon text-sky-700 text-2xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                        </button>
+                        <div id="accordion-ts-path-general" class="accordion-content mt-2 p-4 bg-slate-50 rounded-md space-y-3">
+                            <ul class="list-disc list-inside pl-4 space-y-1">
+                                <li><strong>タイプミス確認:</strong> PATHに追加したフォルダーパスに誤りがないか、一文字ずつ確認してください。</li>
+                                <li><strong>セミコロン:</strong> (古いWindowsの表示の場合) パスはセミコロン<code>;</code>で区切られます。過不足がないか確認。</li>
+                                <li><strong>順番:</strong> PATHは上から順に検索されます。通常は問題になりませんが、同名プログラムが複数ある場合は注意。</li>
+                                <li><strong>ユーザーPATH vs システムPATH:</strong> 編集したPATHの種類（ユーザー/システム）と現在のログインユーザーを確認。通常はユーザーPATHが安全です。</li>
+                                <li><strong>PC再起動:</strong> どうしてもうまくいかない場合、PCを再起動すると解決することがあります。</li>
+                            </ul>
+                            <p class="mt-2">これらのエラーは初心者がよく遭遇するものですが、原因を理解し、一つ一つ確認していけば必ず解決できます。焦らず、手順を見直してみてください。</p>
+                        </div>
+                    </div>
+                    <div class="mt-8 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-r-md">
+                        <h3 class="text-xl font-semibold mb-2">総まとめ: やりましたね！</h3>
+                        <p>自分自身を褒めてあげてください！あなたはPython、Ghostscript、そして謎めいたPATH変数の世界をうまく乗り越えました。ソフトウェアの確認方法、インストール方法、PCにその場所を教える方法、そして基本的なトラブルシューティングまで学びました。これは素晴らしい成果です！</p>
+                        <p class="mt-2">これで、いくつかの強力なツールを使う準備が整いました。さあ、それらで何ができるか探求してみましょう！</p>
                     </div>
                 </section>
 
-                <section class="mb-16">
-                    <h2 class="text-3xl font-bold section-title mb-8 text-center">🐍 Step 2: Pythonを手に入れよう！</h2>
-                    <div class="space-y-8">
-                        <div class="card p-6 rounded-lg shadow-lg">
-                            <div class="flex items-center mb-3">
-                                <span class="step-number w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold mr-3">1</span>
-                                <h3 class="text-xl font-semibold primary-text">もう入ってる？確認しよう</h3>
+                <section id="part7" class="content-section space-y-6">
+                    <h2 class="text-2xl font-bold text-sky-600 border-b-2 border-sky-200 pb-2">Part 7: クイックリファレンス - 手順早見表</h2>
+                    <p class="leading-relaxed">ここまでの重要な手順を一覧にまとめました。設定を見直したい時や、後で手順を再確認したい時にご活用ください。</p>
+                    <ul class="space-y-4">
+                        <li><strong>Windowsバージョン確認 (32/64ビット):</strong> スタート > 設定 > システム > バージョン情報 > 「システムの種類」。</li>
+                        <li><strong>Pythonインストール確認:</strong> コマンドプロンプトで <code>python --version</code> および <code>where python</code>。</li>
+                        <li><strong>Pythonインストール:</strong> <a href="https://www.python.org/downloads/" target="_blank" class="text-sky-600 hover:underline">python.org</a> からダウンロード。インストーラー実行時、<strong>「Add Python to PATH」に必ずチェック</strong>。</li>
+                        <li><strong>Ghostscriptインストール確認:</strong> コマンドプロンプトで <code>gswin64c -h</code> (64bit) / <code>gswin32c -h</code> (32bit)。デフォルト場所: <code>C:\Program Files\gs\gsX.XX</code>。</li>
+                        <li><strong>Ghostscriptインストール:</strong> <a href="https://ghostscript.com/releases/gsdnld.html" target="_blank" class="text-sky-600 hover:underline">ghostscript.com</a> からAGPL版をダウンロード (32/64bit合わせる)。CJKフォントオプションあればチェック。</li>
+                        <li><strong>PATH環境変数編集 (ユーザーPATH):</strong> Windows検索「環境変数」> システム環境変数の編集 > 詳細設定 > 環境変数... > ユーザー環境変数の「Path」を選択し編集。
+                            <ul class="list-disc list-inside pl-6 mt-1 space-y-1 text-sm">
+                                <li><strong>Python手動PATH追加:</strong> Pythonメインフォルダー (例: <code>C:\Users\...\Python\PythonXX</code>) と <code>Scripts</code>フォルダー (例: <code>C:\Users\...\Python\PythonXX\Scripts</code>) を追加。</li>
+                                <li><strong>Ghostscript手動PATH追加:</strong> Ghostscript <code>bin</code>フォルダー (例: <code>C:\Program Files\gs\gsX.XX\bin</code>) と <code>lib</code>フォルダー (例: <code>C:\Program Files\gs\gsX.XX\lib</code>) を追加。</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </section>
+
+                <section id="part8" class="content-section space-y-4">
+                    <h2 class="text-2xl font-bold text-sky-600 border-b-2 border-sky-200 pb-2">Part 8: あなたの便利なIT用語集 (やさしく解説！)</h2>
+                    <p class="leading-relaxed">このガイドで使われたIT用語を、初心者の方にも分かりやすく解説します。これで専門用語も怖くない！</p>
+                    <div class="space-y-3">
+                        <div class="term-item">
+                            <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-32-64bit">
+                                <span>32ビット / 64ビット</span>
+                                <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                            </button>
+                            <div id="term-32-64bit" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
+                                PCのプロセッサーが一度に扱えるデータ量。64ビットの方が新しく高性能。通常、システムに合ったソフトウェアを選びます。
                             </div>
-                            <p class="text-gray-700 mb-2">コマンドプロンプト (検索で「cmd」) を開いて入力：</p>
-                            <div class="command-box p-3 rounded-md text-sm">python --version</div>
-                            <p class="text-sm text-gray-600 mt-1">バージョンが表示されればOK！エラーなら次へ。</p>
                         </div>
-
-                        <div class="text-center flow-arrow">↓</div>
-
-                        <div class="card p-6 rounded-lg shadow-lg">
-                            <div class="flex items-center mb-3">
-                                <span class="step-number w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold mr-3">2</span>
-                                <h3 class="text-xl font-semibold primary-text">公式サイトからダウンロード</h3>
+                        <div class="term-item">
+                            <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-agpl">
+                                <span>AGPL (GNU Affero General Public License)</span>
+                                <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                            </button>
+                            <div id="term-agpl" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
+                                無料のオープンソースライセンスの一種。Ghostscriptの場合、個人利用は無料。改変版をネットワーク配布する場合などに条件あり。
                             </div>
-                            <p class="text-gray-700">python.org/downloads/ へアクセス！</p>
-                            <p class="text-gray-700">最新版の「Download Python X.X.X」ボタンをクリック。</p>
-                            <img src="/api/placeholder/600/150" alt="Pythonダウンロードページイメージ" class="mt-2 rounded shadow-md mx-auto">
                         </div>
-
-                        <div class="text-center flow-arrow">↓</div>
-
-                        <div class="card p-6 rounded-lg shadow-lg">
-                            <div class="flex items-center mb-3">
-                                <span class="step-number w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold mr-3">3</span>
-                                <h3 class="text-xl font-semibold primary-text">インストール実行！ <span class="accent-text">(最重要ポイントあり！)</span></h3>
+                        <div class="term-item">
+                            <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-cmd">
+                                <span>コマンドプロンプト (CMD)</span>
+                                <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                            </button>
+                            <div id="term-cmd" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
+                                テキストコマンドでPCに指示を出すためのWindowsプログラム。PCの脳への直通電話のようなもの。
                             </div>
-                            <p class="text-gray-700 mb-3">ダウンロードした .exe ファイルを実行。</p>
-                            <div class="highlight-box p-4 rounded-md text-center">
-                                <p class="text-lg font-bold">⚠️ 超重要！ ⚠️</p>
-                                <p>インストーラー最初の画面で<br><strong class="primary-text text-xl">「Add Python X.X to PATH」</strong><br>に必ずチェックを入れてね！</p>
-                                <img src="/api/placeholder/400/200" alt="Add Python to PATHのチェックボックス" class="mt-2 rounded shadow-md mx-auto">
-                            </div>
-                            <p class="text-gray-700 mt-3">その後「Install Now」をクリック。</p>
                         </div>
-                        <div class="text-center flow-arrow">↓</div>
-                        <div class="card p-6 rounded-lg shadow-lg">
-                            <div class="flex items-center mb-3">
-                                <span class="step-number w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold mr-3">4</span>
-                                <h3 class="text-xl font-semibold primary-text">インストール完了確認</h3>
+                        <div class="term-item">
+                            <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-directory">
+                                <span>ディレクトリ / フォルダー</span>
+                                <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                            </button>
+                            <div id="term-directory" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
+                                ファイルや他のフォルダーを保存する場所。デジタルファイリングキャビネットのようなもの。
                             </div>
-                            <p class="text-gray-700 mb-2">新しいコマンドプロンプトを開いて再度入力：</p>
-                            <div class="command-box p-3 rounded-md text-sm">python --version</div>
-                            <p class="text-sm text-gray-600 mt-1">バージョンが表示されれば成功！🎉</p>
+                        </div>
+                        <div class="term-item">
+                            <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-envvar">
+                                <span>環境変数</span>
+                                <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                            </button>
+                            <div id="term-envvar" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
+                                OSが保存している特別な情報で、プログラムがシステム設定などを取得するために使用。PATHもその一つ。
+                            </div>
+                        </div>
+                         <div class="term-item">
+                            <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-exe">
+                                <span>実行ファイル (.exe)</span>
+                                <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                            </button>
+                            <div id="term-exe" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
+                                PCが実行できるプログラムを含むファイル。ダブルクリックでプログラムやインストーラーが起動。
+                            </div>
+                        </div>
+                        <div class="term-item">
+                            <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-ghostscript">
+                                <span>Ghostscript</span>
+                                <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                            </button>
+                            <div id="term-ghostscript" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
+                                PDFやPostScriptファイル（印刷やグラフィック用）を他のソフトウェアが扱うのを助ける舞台裏プログラム。
+                            </div>
+                        </div>
+                        <div class="term-item">
+                            <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-installer">
+                                <span>インストーラー</span>
+                                <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                            </button>
+                            <div id="term-installer" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
+                                他のソフトウェアをPCにセットアップ（インストール）するのを助けるプログラム。
+                            </div>
+                        </div>
+                        <div class="term-item">
+                            <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-opensource">
+                                <span>オープンソース</span>
+                                <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                            </button>
+                            <div id="term-opensource" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
+                                元のコード（プログラムの設計図）が無料で公開されているソフトウェア。PythonやAGPL版Ghostscriptなど。
+                            </div>
+                        </div>
+                        <div class="term-item">
+                            <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-path">
+                                <span>PATH (環境変数)</span>
+                                <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                            </button>
+                            <div id="term-path" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
+                                Windowsがプログラムを探すときにチェックするフォルダーの場所のリスト。プログラムの「住所録」。
+                            </div>
+                        </div>
+                        <div class="term-item">
+                            <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-setpath">
+                                <span>「PATHを通す」</span>
+                                <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                            </button>
+                            <div id="term-setpath" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
+                                フォルダーの場所をPATH環境変数に追加すること。これによりWindowsがそのフォルダー内のプログラムを簡単に見つけられる。
+                            </div>
+                        </div>
+                        <div class="term-item">
+                            <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-pip">
+                                <span>pip</span>
+                                <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                            </button>
+                            <div id="term-pip" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
+                                Pythonの追加パッケージ（ライブラリ）をインストール・管理するためのツール。Pythonと一緒にインストールされる。
+                            </div>
+                        </div>
+                        <div class="term-item">
+                            <button class="accordion-button w-full text-left text-lg font-semibold text-sky-700 p-2 bg-sky-50 rounded-md hover:bg-sky-100 transition flex justify-between items-center" data-target="term-python">
+                                <span>Python</span>
+                                <span class="accordion-icon text-sky-700 text-xl"><span class="accordion-icon-plus">+</span><span class="accordion-icon-minus">-</span></span>
+                            </button>
+                            <div id="term-python" class="accordion-content mt-1 p-3 bg-slate-50 rounded-md text-sm">
+                                ウェブ開発、データサイエンス、AIなど多用途で人気のあるプログラミング言語。比較的学びやすい。
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                <section class="mb-16">
-                    <h2 class="text-3xl font-bold section-title mb-8 text-center">🔗 Step 3: 「PATHを通す」って何？</h2>
-                    <div class
+                 <section id="no-content" class="content-section text-center py-10">
+                    <img src="https://placehold.co/120x120/e0f2fe/0369a1?text=🖥️" alt="準備中アイコン" class="mx-auto mb-4 rounded-full">
+                    <h2 class="text-2xl font-semibold text-sky-700">コンテンツを選択してください</h2>
+                    <p class="text-slate-600 mt-2">左の目次から、表示したい項目を選んでください。</p>
+                </section>
+
+            </main>
+        </div>
+
+        <footer class="text-center py-6 mt-auto text-slate-500 text-sm border-t border-slate-200">
+            <p>&copy; 2025 TK2 Lab. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const accordionButtons = document.querySelectorAll('.accordion-button');
+            const copyButtons = document.querySelectorAll('.copy-btn');
+            const mainContentArea = document.getElementById('contentArea');
+
+            function setActiveSection(targetId) {
+                contentSections.forEach(section => {
+                    if (section.id === targetId) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    if (link.dataset.target === targetId) {
+                        link.classList.add('bg-sky-100', 'text-sky-700', 'font-semibold');
+                    } else {
+                        link.classList.remove('bg-sky-100', 'text-sky-700', 'font-semibold');
+                    }
+                });
+                mainContentArea.scrollTop = 0; // Scroll to top of content area
+            }
+
+            // Initial section display based on hash or default
+            const initialTarget = window.location.hash ? window.location.hash.substring(1) : 'part1';
+            if (document.getElementById(initialTarget)) {
+                 setActiveSection(initialTarget);
+            } else {
+                 setActiveSection('part1'); // Default to part1 if hash is invalid
+            }
+
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.dataset.target;
+                    setActiveSection(targetId);
+                    // Update URL hash without jumping (handled by setActiveSection's scroll)
+                    if(history.pushState) {
+                        history.pushState(null, null, '#' + targetId);
+                    } else {
+                        window.location.hash = '#' + targetId;
+                    }
+                });
+            });
+            
+            window.addEventListener('hashchange', function() {
+                const targetId = window.location.hash ? window.location.hash.substring(1) : 'part1';
+                 if (document.getElementById(targetId)) {
+                    setActiveSection(targetId);
+                } else {
+                    setActiveSection('part1');
+                }
+            });
+
+
+            accordionButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const targetId = this.dataset.target;
+                    const content = document.getElementById(targetId);
+                    const isOpen = this.classList.toggle('open');
+                    this.setAttribute('aria-expanded', isOpen);
+
+                    if (isOpen) {
+                        content.style.display = 'block';
+                        // For smooth animation, set max-height after display block
+                        requestAnimationFrame(() => {
+                            content.style.maxHeight = content.scrollHeight + 'px';
+                        });
+                    } else {
+                        content.style.maxHeight = '0px';
+                        // Wait for transition to finish before setting display to none
+                        content.addEventListener('transitionend', function handler() {
+                            if (!button.classList.contains('open')) { // check if still closed
+                                content.style.display = 'none';
+                            }
+                            content.removeEventListener('transitionend', handler);
+                        });
+                    }
+                });
+            });
+
+            copyButtons.forEach(button => {
+                const tooltip = button.querySelector('.tooltip');
+                button.addEventListener('click', function () {
+                    const command = this.dataset.command;
+                    const tempTextArea = document.createElement('textarea');
+                    tempTextArea.value = command;
+                    document.body.appendChild(tempTextArea);
+                    tempTextArea.select();
+                    try {
+                        document.execCommand('copy');
+                        if(tooltip) {
+                            tooltip.textContent = 'コピーしました!';
+                            tooltip.style.visibility = 'visible';
+                            tooltip.style.opacity = '1';
+                            setTimeout(() => {
+                                tooltip.style.visibility = 'hidden';
+                                tooltip.style.opacity = '0';
+                            }, 1500);
+                        }
+                    } catch (err) {
+                        if(tooltip) {
+                            tooltip.textContent = 'コピー失敗';
+                             tooltip.style.visibility = 'visible';
+                            tooltip.style.opacity = '1';
+                             setTimeout(() => {
+                                tooltip.style.visibility = 'hidden';
+                                tooltip.style.opacity = '0';
+                            }, 1500);
+                        }
+                        console.error('Failed to copy: ', err);
+                    }
+                    document.body.removeChild(tempTextArea);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
